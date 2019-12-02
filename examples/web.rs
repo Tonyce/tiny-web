@@ -1,9 +1,11 @@
 extern crate tiny_web;
+extern crate env_logger;
 
 use std::sync::Arc;
 use std::thread;
 
 fn main() {
+    env_logger::init();
     println!("web");
     let server = Arc::new(tiny_web::Server::http("0.0.0.0:9876").unwrap());
     println!("Now listening on port 9876");
