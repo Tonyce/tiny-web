@@ -1,14 +1,16 @@
-extern crate tiny_web;
+#[macro_use]
+extern crate log;
 extern crate env_logger;
+extern crate tiny_web;
 
 use std::sync::Arc;
 use std::thread;
 
 fn main() {
     env_logger::init();
-    println!("web");
+    let version = env!("CARGO_PKG_VERSION");
     let server = Arc::new(tiny_web::Server::http("0.0.0.0:9876").unwrap());
-    println!("Now listening on port 9876");
+    info!("Now listening on port 9876, version: {}", version);
 
     let mut handles = Vec::new();
     for _ in 0..4 {

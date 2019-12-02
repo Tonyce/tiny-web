@@ -1,0 +1,54 @@
+{
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in library 'tiny-web'",
+      "cargo": {
+        "args": ["test", "--no-run", "--lib", "--package=tiny-web"],
+        "filter": {
+          "name": "tiny-web",
+          "kind": "lib"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug example 'web'",
+      "cargo": {
+        "args": ["build", "--example=web", "--package=tiny-web"],
+        "filter": {
+          "name": "web",
+          "kind": "example"
+        }
+      },
+      "args": [],
+      // lldb 配置：https://github.com/vadimcn/vscode-lldb/blob/master/MANUAL.md
+      "env": {
+        "RUST_LOG": "debug"
+      },
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests in example 'web'",
+      "cargo": {
+        "args": ["test", "--no-run", "--example=web", "--package=tiny-web"],
+        "filter": {
+          "name": "web",
+          "kind": "example"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}

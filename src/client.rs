@@ -187,7 +187,7 @@ impl Iterator for ClientConnection {
         }
 
         loop {
-            let rq = match self.read() {
+            let req = match self.read() {
                 Err(ReadError::WrongRequestLine) => {
                     let writer = self.sink.next().unwrap();
                     let response = Response::new_empty(StatusCode(400));
@@ -225,11 +225,11 @@ impl Iterator for ClientConnection {
 
                 Err(ReadError::ReadIoError(_)) => return None,
 
-                Ok(rq) => rq,
+                Ok(req) => req,
             };
 
             // checking HTTP version
-            if *rq.http_version() > (1, 1) {
+            if *req.http_version() > (1, 1) {
                 let writer = self.sink.next().unwrap();
                 let response = Response::from_string(
                     "This server only supports HTTP versions 1.0 and 1.1".to_owned(),
@@ -243,7 +243,7 @@ impl Iterator for ClientConnection {
 
             // updating the status of the connection
             {
-                let connection_header = rq
+                let connection_header = req
                     .headers()
                     .iter()
                     .find(|h| h.field.equiv(&"Connection"))
@@ -258,19 +258,21 @@ impl Iterator for ClientConnection {
 
                     Some(ref val)
                         if !val.contains("keep-alive")
-                            && *rq.http_version() == HTTPVersion(1, 0) =>
+                            && *req.http_version() == HTTPVersion(1, 0) =>
                     {
                         self.no_more_requests = true
                     }
 
-                    None if *rq.http_version() == HTTPVersion(1, 0) => self.no_more_requests = true,
+                    None if *req.http_version() == HTTPVersion(1, 0) => {
+                        self.no_more_requests = true
+                    }
 
                     _ => (),
                 };
             }
 
             // returning the request
-            return Some(rq);
+            return Some(req);
         }
     }
 }

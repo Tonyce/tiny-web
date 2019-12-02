@@ -105,22 +105,6 @@ impl Server {
         })
     }
 
-    /// Shortcut for an HTTPS server on a specific address.
-    #[cfg(feature = "ssl")]
-    #[inline]
-    pub fn https<A>(
-        addr: A,
-        config: SslConfig,
-    ) -> Result<Server, Box<Error + Send + Sync + 'static>>
-    where
-        A: ToSocketAddrs,
-    {
-        Server::new(ServerConfig {
-            addr: addr,
-            ssl: Some(config),
-        })
-    }
-
     /// Builds a new server that listens on the specified address.
     pub fn new<A>(config: ServerConfig<A>) -> Result<Server, Box<dyn Error + Send + Sync + 'static>>
     where
@@ -167,13 +151,14 @@ impl Server {
                                 // Synchronization is needed for HTTPS requests to avoid a deadlock
                                 if client.secure() {
                                     let (sender, receiver) = mpsc::channel();
-                                    for rq in client {
-                                        messages.push(rq.with_notify_sender(sender.clone()).into());
+                                    for req in client {
+                                        messages
+                                            .push(req.with_notify_sender(sender.clone()).into());
                                         receiver.recv().unwrap();
                                     }
                                 } else {
-                                    for rq in client {
-                                        messages.push(rq.into());
+                                    for req in client {
+                                        messages.push(req.into());
                                     }
                                 }
                             }
@@ -222,7 +207,7 @@ impl Server {
     pub fn recv(&self) -> IoResult<Request> {
         match self.messages.pop() {
             Message::Error(err) => return Err(err),
-            Message::NewRequest(rq) => return Ok(rq),
+            Message::NewRequest(req) => return Ok(req),
         }
     }
 
